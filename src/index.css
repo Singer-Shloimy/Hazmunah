@@ -1,0 +1,57 @@
+:root {
+  --ink: #141c28;
+  --ink-soft: #2a3548;
+  --mist: #e8eef4;
+  --paper: #f7fafc;
+  --blossom: #d4788c;
+  --blossom-deep: #b85a70;
+  --gold: #c9a227;
+  --sage: #6f8f7a;
+  --font-display: 'Instrument Serif', 'Assistant', Georgia, serif;
+  --font-body: 'Assistant', 'Figtree', system-ui, sans-serif;
+  --radius: 18px;
+  --shadow: 0 24px 60px rgba(20, 28, 40, 0.18);
+  color: var(--ink);
+  background: var(--ink);
+  font-family: var(--font-body);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--ink);
+  color: var(--mist);
+}
+
+button,
+input,
+textarea,
+a {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+#root {
+  min-height: 100vh;
+}
