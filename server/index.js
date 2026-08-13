@@ -11,9 +11,11 @@ import { PRODUCTS, listProducts } from './products.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.join(__dirname)
-const DATA_DIR = path.join(ROOT, 'data')
-const MUSIC_DIR = path.join(ROOT, 'uploads', 'music')
-const DESIGNS_DIR = path.join(ROOT, 'uploads', 'designs')
+const CLIENT_DIST = path.join(ROOT, '..', 'dist')
+const DATA_DIR = process.env.DATA_DIR || path.join(ROOT, 'data')
+const UPLOADS_DIR = process.env.UPLOADS_DIR || path.join(ROOT, 'uploads')
+const MUSIC_DIR = path.join(UPLOADS_DIR, 'music')
+const DESIGNS_DIR = path.join(UPLOADS_DIR, 'designs')
 const FORMS_FILE = path.join(DATA_DIR, 'forms.json')
 const MUSIC_FILE = path.join(DATA_DIR, 'music.json')
 const ORDERS_FILE = path.join(DATA_DIR, 'orders.json')
@@ -111,7 +113,8 @@ const uploadDesign = multer({
 })
 
 const app = express()
-app.use(cors())
+app.set('trust proxy', 1)
+app.use(cors({ origin: true }))
 
 // Stripe webhooks need the raw body
 app.post(
@@ -480,13 +483,31 @@ app.delete('/api/admin/music/:id', requireAdmin, (req, res) => {
   res.json({ ok: true })
 })
 
+// Production / Railway: serve the Vite build from the same process
+if (fs.existsSync(CLIENT_DIST)) {
+  app.use(express.static(CLIENT_DIST, { index: false }))
+  app.use((req, res, next) => {
+    if (req.method !== 'GET' && req.method !== 'HEAD') return next()
+    if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
+      return next()
+    }
+    res.sendFile(path.join(CLIENT_DIST, 'index.html'), (err) => {
+      if (err) next(err)
+    })
+  })
+}
+
 app.listen(PORT, () => {
-  console.log(`Hazmunah API on http://localhost:${PORT}`)
+  console.log(`Hazmunah on http://localhost:${PORT}`)
+  console.log(`App URL: ${APP_URL}`)
+  console.log(
+    `Static site: ${fs.existsSync(CLIENT_DIST) ? CLIENT_DIST : 'not built (API only)'}`,
+  )
   console.log(`Admin password: ${ADMIN_PASSWORD}`)
   console.log(`Payments: ${paymentMode()}`)
   if (paymentMode() !== 'stripe') {
     console.log(
-      'Add STRIPE_SECRET_KEY + STRIPE_PUBLISHABLE_KEY to .env for live card checkout',
+      'Add STRIPE_SECRET_KEY + STRIPE_PUBLISHABLE_KEY for live card checkout',
     )
   }
 })

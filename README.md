@@ -38,6 +38,46 @@ Set `STRIPE_WEBHOOK_SECRET` from that command.
 
 Without Stripe keys, checkout stays in **demo** mode (`ALLOW_DEMO_PAYMENTS=1`).
 
+## Deploy on Railway (Option A — one service)
+
+One service runs **API + built website**.
+
+1. Create a Railway project from this repo  
+2. Set variables:
+
+```env
+APP_URL=https://YOUR-APP.up.railway.app
+ADMIN_PASSWORD=choose-a-strong-password
+STRIPE_SECRET_KEY=sk_live_...   # or sk_test_...
+STRIPE_PUBLISHABLE_KEY=pk_live_...
+ALLOW_DEMO_PAYMENTS=0
+```
+
+3. (Recommended) Add a **volume** mounted at `/data`, then also set:
+
+```env
+DATA_DIR=/data
+UPLOADS_DIR=/data/uploads
+```
+
+Without a volume, uploads and orders reset on every redeploy.
+
+4. Deploy. Railway runs `npm run build` then `npm start`.  
+   Open the public URL — site, `/admin`, `/checkout`, and `/api` all share it.
+
+5. In Stripe Dashboard, set the webhook endpoint to  
+   `https://YOUR-APP.up.railway.app/api/webhooks/stripe`  
+   and put `STRIPE_WEBHOOK_SECRET` in Railway variables.
+
+Local check of the production bundle:
+
+```bash
+npm run build
+npm start
+```
+
+Then open http://localhost:8787/
+
 ## Custom PDF designs
 
 1. Open `/admin` and sign in  
